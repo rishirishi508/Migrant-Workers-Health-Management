@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Registration - Digital Health Records</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://use.typekit.net/yjp3aho.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: "sofia-pro", sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+  <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl w-full space-y-8">
+      <div class="text-center" data-id="registration-header">
+        <a href="{{ url_for('index') }}" class="inline-block mb-6" data-id="back-home-link">
+          <i data-lucide="arrow-left" class="w-6 h-6 text-green-600 hover:text-green-800 transition-colors"></i>
+        </a>
+        <h2 class="text-3xl font-bold text-gray-900 mb-2" data-id="registration-title">Doctor Registration</h2>
+        <p class="text-gray-600" data-id="registration-subtitle">Join our healthcare network to provide secure patient care</p>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="rounded-md p-4 {{ 'bg-red-50 border border-red-200' if category == 'error' else 'bg-green-50 border border-green-200' }}"
+                 data-id="flash-message">
+              <p class="{{ 'text-red-700' if category == 'error' else 'text-green-700' }}">{{ message }}</p>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <div class="bg-white py-8 px-6 shadow-xl rounded-lg" data-id="registration-form-container">
+        <form class="space-y-6" method="POST" data-id="registration-form">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="name" class="block text-sm font-medium text-gray-700 mb-2" data-id="name-label">
+                Full Name <span class="text-red-500">*</span>
+              </label>
+              <input id="name" 
+                     name="name" 
+                     type="text" 
+                     required 
+                     placeholder="Dr. John Smith"
+                     class="w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                     data-id="name-input">
+            </div>
+
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-2" data-id="email-label">
+                Email Address <span class="text-red-500">*</span>
+              </label>
+              <input id="email" 
+                     name="email" 
+                     type="email" 
+                     required 
+                     placeholder="doctor@hospital.com"
+                     class="w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                     data-id="email-input">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="license_number" class="block text-sm font-medium text-gray-700 mb-2" data-id="license-label">
+                Medical License Number <span class="text-red-500">*</span>
+              </label>
+              <input id="license_number" 
+                     name="license_number" 
+                     type="text" 
+                     required 
+                     placeholder="MD123456"
+                     class="w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                     data-id="license-input">
+            </div>
+
+            <div>
+              <label for="specialization" class="block text-sm font-medium text-gray-700 mb-2" data-id="specialization-label">
+                Specialization <span class="text-red-500">*</span>
+              </label>
+              <select id="specialization" 
+                      name="specialization" 
+                      required
+                      class="w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      data-id="specialization-select">
+                <option value="">Select specialization</option>
+                <option value="General Medicine">General Medicine</option>
+                <option value="Cardiology">Cardiology</option>
+                <option value="Dermatology">Dermatology</option>
+                <option value="Emergency Medicine">Emergency Medicine</option>
+                <option value="Family Medicine">Family Medicine</option>
+                <option value="Internal Medicine">Internal Medicine</option>
+                <option value="Neurology">Neurology</option>
+                <option value="Occupational Medicine">Occupational Medicine</option>
+                <option value="Orthopedics">Orthopedics</option>
+                <option value="Pediatrics">Pediatrics</option>
+                <option value="Psychiatry">Psychiatry</option>
+                <option value="Pulmonology">Pulmonology</option>
+                <option value="Radiology">Radiology</option>
+                <option value="Surgery">Surgery</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="contact" class="block text-sm font-medium text-gray-700 mb-2" data-id="contact-label">
+              Contact Number <span class="text-red-500">*</span>
+            </label>
+            <input id="contact" 
+                   name="contact" 
+                   type="tel" 
+                   required 
+                   placeholder="+1-555-0123"
+                   class="w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                   data-id="contact-input">
+          </div>
+
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-2" data-id="password-label">
+              Password <span class="text-red-500">*</span>
+            </label>
+            <input id="password" 
+                   name="password" 
+                   type="password" 
+                   required 
+                   minlength="8"
+                   placeholder="Create a secure password (minimum 8 characters)"
+                   class="w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                   data-id="password-input">
+          </div>
+
+          <div>
+            <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-2" data-id="confirm-password-label">
+              Confirm Password <span class="text-red-500">*</span>
+            </label>
+            <input id="confirm_password" 
+                   name="confirm_password" 
+                   type="password" 
+                   required 
+                   minlength="8"
+                   placeholder="Confirm your password"
+                   class="w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                   data-id="confirm-password-input">
+          </div>
+
+          <div class="flex items-start">
+            <div class="flex items-center h-5">
+              <input id="terms" 
+                     name="terms" 
+                     type="checkbox" 
+                     required
+                     class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                     data-id="terms-checkbox">
+            </div>
+            <div class="ml-3 text-sm">
+              <label for="terms" class="text-gray-700" data-id="terms-label">
+                I agree to the <a href="#" class="text-green-600 hover:text-green-500 font-medium">Terms of Service</a> 
+                and <a href="#" class="text-green-600 hover:text-green-500 font-medium">Privacy Policy</a>, 
+                and I understand my responsibilities regarding patient data protection and HIPAA compliance.
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <button type="submit" 
+                    class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+                    data-id="register-submit-btn">
+              <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                <i data-lucide="user-plus" class="w-5 h-5 text-green-500 group-hover:text-green-400"></i>
+              </span>
+              Register as Doctor
+            </button>
+          </div>
+
+          <div class="text-center">
+            <p class="text-sm text-gray-600" data-id="login-prompt">
+              Already have an account? 
+              <a href="{{ url_for('doctor_login') }}" class="font-medium text-green-600 hover:text-green-500 transition-colors" data-id="login-link">
+                Sign in here
+              </a>
+            </p>
+          </div>
+        </form>
+      </div>
+
+      <!-- Information Cards -->
+      <div class="grid md:grid-cols-2 gap-6" data-id="info-cards">
+        <div class="bg-green-50 border border-green-200 rounded-lg p-6" data-id="security-info">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <i data-lucide="shield-check" class="w-6 h-6 text-green-600"></i>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-green-800" data-id="security-title">HIPAA Compliant</h3>
+              <div class="mt-2 text-sm text-green-700">
+                <p data-id="security-text">Our system meets all HIPAA requirements for patient data protection. All access is logged and audited for compliance.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6" data-id="features-info">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <i data-lucide="activity" class="w-6 h-6 text-blue-600"></i>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-blue-800" data-id="features-title">Advanced Features</h3>
+              <div class="mt-2 text-sm text-blue-700">
+                <p data-id="features-text">Access AI-powered risk assessment, secure patient communication, and comprehensive medical record management.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Verification Notice -->
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4" data-id="verification-notice">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-yellow-600"></i>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-yellow-800" data-id="verification-title">Account Verification Required</h3>
+            <div class="mt-2 text-sm text-yellow-700">
+              <p data-id="verification-text">
+                After registration, your medical license will be verified within 24-48 hours. 
+                You will receive an email confirmation once your account is approved and activated.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Form validation
+    const form = document.querySelector('[data-id="registration-form"]');
+    const passwordInput = document.querySelector('[data-id="password-input"]');
+    const confirmPasswordInput = document.querySelector('[data-id="confirm-password-input"]');
+    const submitBtn = document.querySelector('[data-id="register-submit-btn"]');
+
+    // Phone number formatting
+    document.querySelector('[data-id="contact-input"]').addEventListener('input', (e) => {
+      let value = e.target.value.replace(/\D/g, '');
+      
+      if (value.length > 0) {
+        if (value.length <= 3) {
+          value = `+1-${value}`;
+        } else if (value.length <= 6) {
+          value = `+1-${value.slice(0, 3)}-${value.slice(3)}`;
+        } else {
+          value = `+1-${value.slice(0, 3)}-${value.slice(3, 6)}-${value.slice(6, 10)}`;
+        }
+      }
+      
+      e.target.value = value;
+    });
+
+    // License number formatting
+    document.querySelector('[data-id="license-input"]').addEventListener('input', (e) => {
+      let value = e.target.value.toUpperCase();
+      // Allow letters, numbers, and common separators
+      value = value.replace(/[^A-Z0-9\-]/g, '');
+      e.target.value = value;
+    });
+
+    // Password strength indicator
+    passwordInput.addEventListener('input', (e) => {
+      const password = e.target.value;
+      let strength = 0;
+      
+      if (password.length >= 8) strength++;
+      if (/[A-Z]/.test(password)) strength++;
+      if (/[a-z]/.test(password)) strength++;
+      if (/\d/.test(password)) strength++;
+      if (/[^A-Za-z\d]/.test(password)) strength++;
+
+      const colors = ['border-red-500', 'border-orange-500', 'border-yellow-500', 'border-blue-500', 'border-green-500'];
+      e.target.className = e.target.className.replace(/border-(red|orange|yellow|blue|green)-500/g, 'border-gray-300');
+      
+      if (password.length > 0) {
+        e.target.className = e.target.className.replace('border-gray-300', colors[Math.min(strength, 4)]);
+      }
+    });
+
+    // Password confirmation validation
+    function validatePasswords() {
+      const password = passwordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+      
+      if (confirmPassword && password !== confirmPassword) {
+        confirmPasswordInput.classList.remove('border-gray-300');
+        confirmPasswordInput.classList.add('border-red-500');
+        return false;
+      } else if (confirmPassword) {
+        confirmPasswordInput.classList.remove('border-red-500');
+        confirmPasswordInput.classList.add('border-green-500');
+        return true;
+      }
+      return true;
+    }
+
+    confirmPasswordInput.addEventListener('input', validatePasswords);
+    passwordInput.addEventListener('input', validatePasswords);
+
+    // Email validation
+    document.querySelector('[data-id="email-input"]').addEventListener('blur', (e) => {
+      const email = e.target.value;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      
+      if (email && !emailRegex.test(email)) {
+        e.target.classList.add('border-red-500');
+      } else {
+        e.target.classList.remove('border-red-500');
+      }
+    });
+
+    // Form submission
+    form.addEventListener('submit', (e) => {
+      const password = passwordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+      
+      if (password !== confirmPassword) {
+        e.preventDefault();
+        alert('Passwords do not match. Please check your password confirmation.');
+        confirmPasswordInput.focus();
+        return;
+      }
+
+      // Check all required fields
+      const requiredFields = form.querySelectorAll('[required]');
+      let hasErrors = false;
+
+      requiredFields.forEach(field => {
+        if (!field.value.trim() || (field.type === 'checkbox' && !field.checked)) {
+          field.classList.add('border-red-500');
+          hasErrors = true;
+        } else {
+          field.classList.remove('border-red-500');
+        }
+      });
+
+      if (hasErrors) {
+        e.preventDefault();
+        alert('Please fill in all required fields.');
+        return;
+      }
+
+      // Show loading state
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i data-lucide="loader" class="w-5 h-5 inline mr-2 animate-spin"></i> Registering...';
+      lucide.createIcons();
+    });
+
+    // Real-time validation for required fields
+    document.querySelectorAll('[required]').forEach(field => {
+      field.addEventListener('blur', () => {
+        if (!field.value.trim() || (field.type === 'checkbox' && !field.checked)) {
+          field.classList.add('border-red-500');
+        } else {
+          field.classList.remove('border-red-500');
+        }
+      });
+
+      field.addEventListener('input', () => {
+        if (field.classList.contains('border-red-500') && field.value.trim()) {
+          field.classList.remove('border-red-500');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

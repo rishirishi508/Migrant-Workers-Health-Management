@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Worker Registration - Digital Health Records</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://use.typekit.net/yjp3aho.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: "sofia-pro", sans-serif; }
+    .step-inactive { opacity: 0.5; }
+    .step-active { opacity: 1; }
+    .step-completed { opacity: 1; background-color: #10b981; color: white; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+  <div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+      <!-- Header -->
+      <div class="text-center mb-8" data-id="registration-header">
+        <a href="{{ url_for('index') }}" class="inline-block mb-6" data-id="back-home-link">
+          <i data-lucide="arrow-left" class="w-6 h-6 text-indigo-600 hover:text-indigo-800 transition-colors"></i>
+        </a>
+        <h1 class="text-4xl font-bold text-gray-900 mb-2" data-id="registration-title">Worker Registration</h1>
+        <p class="text-gray-600" data-id="registration-subtitle">Complete your registration to receive your digital health card</p>
+      </div>
+
+      <!-- Progress Steps -->
+      <div class="mb-8" data-id="progress-container">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center">
+              <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium step-active"
+                   data-id="step-1-indicator">1</div>
+              <span class="ml-2 text-sm font-medium text-gray-900" data-id="step-1-label">Basic Info</span>
+            </div>
+            <div class="w-16 h-0.5 bg-gray-300" data-id="progress-line-1"></div>
+            <div class="flex items-center">
+              <div class="w-8 h-8 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center text-sm font-medium step-inactive"
+                   data-id="step-2-indicator">2</div>
+              <span class="ml-2 text-sm font-medium text-gray-500" data-id="step-2-label">Emergency Contact</span>
+            </div>
+            <div class="w-16 h-0.5 bg-gray-300" data-id="progress-line-2"></div>
+            <div class="flex items-center">
+              <div class="w-8 h-8 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center text-sm font-medium step-inactive"
+                   data-id="step-3-indicator">3</div>
+              <span class="ml-2 text-sm font-medium text-gray-500" data-id="step-3-label">Health Info</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="rounded-md p-4 mb-6 {{ 'bg-red-50 border border-red-200' if category == 'error' else 'bg-green-50 border border-green-200' }}"
+                 data-id="flash-message">
+              <p class="{{ 'text-red-700' if category == 'error' else 'text-green-700' }}">{{ message }}</p>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <!-- Registration Form -->
+      <div class="bg-white rounded-lg shadow-xl p-8" data-id="registration-form-container">
+        <form method="POST" data-id="registration-form">
+          <!-- Step 1: Basic Information -->
+          <div id="step-1" class="step-content" data-id="step-1-content">
+            <h3 class="text-xl font-semibold text-gray-900 mb-6" data-id="step-1-title">Basic Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-2" data-id="name-label">
+                  Full Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       id="name" 
+                       name="name" 
+                       required 
+                       placeholder="Enter your full name"
+                       class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       data-id="name-input">
+              </div>
+
+              <div>
+                <label for="age" class="block text-sm font-medium text-gray-700 mb-2" data-id="age-label">
+                  Age <span class="text-red-500">*</span>
+                </label>
+                <input type="number" 
+                       id="age" 
+                       name="age" 
+                       required 
+                       min="16" 
+                       max="100"
+                       placeholder="Enter your age"
+                       class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       data-id="age-input">
+              </div>
+
+              <div>
+                <label for="gender" class="block text-sm font-medium text-gray-700 mb-2" data-id="gender-label">
+                  Gender <span class="text-red-500">*</span>
+                </label>
+                <select id="gender" 
+                        name="gender" 
+                        required
+                        class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        data-id="gender-select">
+                  <option value="">Select gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="occupation" class="block text-sm font-medium text-gray-700 mb-2" data-id="occupation-label">
+                  Occupation <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       id="occupation" 
+                       name="occupation" 
+                       required 
+                       placeholder="e.g., Construction Worker, Caregiver"
+                       class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       data-id="occupation-input">
+              </div>
+
+              <div class="md:col-span-2">
+                <label for="contact" class="block text-sm font-medium text-gray-700 mb-2" data-id="contact-label">
+                  Contact Number <span class="text-red-500">*</span>
+                </label>
+                <input type="tel" 
+                       id="contact" 
+                       name="contact" 
+                       required 
+                       placeholder="+91-xxxxxxxxxx"
+                       class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       data-id="contact-input">
+              </div>
+
+              <div class="md:col-span-2">
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-2" data-id="password-label">
+                  Password <span class="text-red-500">*</span>
+                </label>
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       required 
+                       minlength="8"
+                       placeholder="Create a secure password (minimum 8 characters)"
+                       class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       data-id="password-input">
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Emergency Contact -->
+          <div id="step-2" class="step-content hidden" data-id="step-2-content">
+            <h3 class="text-xl font-semibold text-gray-900 mb-6" data-id="step-2-title">Emergency Contact Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="relation_name" class="block text-sm font-medium text-gray-700 mb-2" data-id="relation-name-label">
+                  Emergency Contact Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       id="relation_name" 
+                       name="relation_name" 
+                       required 
+                       placeholder="Full name of emergency contact"
+                       class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       data-id="relation-name-input">
+              </div>
+
+              <div>
+                <label for="relation_type" class="block text-sm font-medium text-gray-700 mb-2" data-id="relation-type-label">
+                  Relationship <span class="text-red-500">*</span>
+                </label>
+                <select id="relation_type" 
+                        name="relation_type" 
+                        required
+                        class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        data-id="relation-type-select">
+                  <option value="">Select relationship</option>
+                  <option value="Parent">Parent</option>
+                  <option value="Spouse">Spouse</option>
+                  <option value="Sibling">Sibling</option>
+                  <option value="Child">Child</option>
+                  <option value="Friend">Friend</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div class="md:col-span-2">
+                <label for="relation_phone" class="block text-sm font-medium text-gray-700 mb-2" data-id="relation-phone-label">
+                  Emergency Contact Phone <span class="text-red-500">*</span>
+                </label>
+                <input type="tel" 
+                       id="relation_phone" 
+                       name="relation_phone" 
+                       required 
+                       placeholder="+91-xxxxxxxxxx"
+                       class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       data-id="relation-phone-input">
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Health Information -->
+          <div id="step-3" class="step-content hidden" data-id="step-3-content">
+            <h3 class="text-xl font-semibold text-gray-900 mb-6" data-id="step-3-title">Health Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="height" class="block text-sm font-medium text-gray-700 mb-2" data-id="height-label">
+                  Height (cm) <span class="text-red-500">*</span>
+                </label>
+                <input type="number" 
+                       id="height" 
+                       name="height" 
+                       required 
+                       min="100" 
+                       max="250"
+                       step="0.1"
+                       placeholder="e.g., 175.5"
+                       class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       data-id="height-input">
+              </div>
+
+              <div>
+                <label for="weight" class="block text-sm font-medium text-gray-700 mb-2" data-id="weight-label">
+                  Weight (kg) <span class="text-red-500">*</span>
+                </label>
+                <input type="number" 
+                       id="weight" 
+                       name="weight" 
+                       required 
+                       min="30" 
+                       max="200"
+                       step="0.1"
+                       placeholder="e.g., 70.5"
+                       class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       data-id="weight-input">
+              </div>
+
+              <div>
+                <label for="blood_group" class="block text-sm font-medium text-gray-700 mb-2" data-id="blood-group-label">
+                  Blood Group <span class="text-red-500">*</span>
+                </label>
+                <select id="blood_group" 
+                        name="blood_group" 
+                        required
+                        class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        data-id="blood-group-select">
+                  <option value="">Select blood group</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2" data-id="bmi-label">
+                  BMI (Calculated)
+                </label>
+                <div class="w-full px-3 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-600"
+                     data-id="bmi-display">
+                  Enter height and weight to calculate BMI
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Navigation Buttons -->
+          <div class="flex justify-between items-center mt-8" data-id="navigation-buttons">
+            <button type="button" 
+                    id="prev-btn" 
+                    class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors hidden"
+                    data-id="prev-button">
+              <i data-lucide="chevron-left" class="w-4 h-4 inline mr-2"></i>
+              Previous
+            </button>
+
+            <button type="button" 
+                    id="next-btn" 
+                    class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    data-id="next-button">
+              Next
+              <i data-lucide="chevron-right" class="w-4 h-4 inline ml-2"></i>
+            </button>
+
+            <button type="submit" 
+                    id="submit-btn" 
+                    class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors hidden"
+                    data-id="submit-button">
+              <i data-lucide="check" class="w-4 h-4 inline mr-2"></i>
+              Complete Registration
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Information Cards -->
+      <div class="grid md:grid-cols-2 gap-6 mt-8" data-id="info-cards">
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6" data-id="privacy-info">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <i data-lucide="shield-check" class="w-6 h-6 text-blue-600"></i>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-blue-800" data-id="privacy-title">Privacy & Security</h3>
+              <div class="mt-2 text-sm text-blue-700">
+                <p data-id="privacy-text">Your health information is encrypted and securely stored. Only authorized healthcare providers can access your records with proper consent.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-green-50 border border-green-200 rounded-lg p-6" data-id="benefits-info">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <i data-lucide="heart" class="w-6 h-6 text-green-600"></i>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-green-800" data-id="benefits-title">Health Benefits</h3>
+              <div class="mt-2 text-sm text-green-700">
+                <p data-id="benefits-text">Get instant access to your health records, downloadable health cards, and AI-powered health assistance in multiple languages.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Multi-step form management
+    let currentStep = 1;
+    const totalSteps = 3;
+
+    // Get elements
+    const nextBtn = document.getElementById('next-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const submitBtn = document.getElementById('submit-btn');
+    const form = document.querySelector('[data-id="registration-form"]');
+
+    // Step navigation
+    function showStep(step) {
+      // Hide all steps
+      document.querySelectorAll('.step-content').forEach(content => {
+        content.classList.add('hidden');
+      });
+
+      // Show current step
+      document.getElementById(`step-${step}`).classList.remove('hidden');
+
+      // Update step indicators
+      for (let i = 1; i <= totalSteps; i++) {
+        const indicator = document.querySelector(`[data-id="step-${i}-indicator"]`);
+        const label = document.querySelector(`[data-id="step-${i}-label"]`);
+        
+        if (i < step) {
+          // Completed step
+          indicator.className = 'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium step-completed';
+          indicator.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
+          label.className = 'ml-2 text-sm font-medium text-green-600';
+        } else if (i === step) {
+          // Active step
+          indicator.className = 'w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium step-active';
+          indicator.textContent = i;
+          label.className = 'ml-2 text-sm font-medium text-gray-900';
+        } else {
+          // Inactive step
+          indicator.className = 'w-8 h-8 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center text-sm font-medium step-inactive';
+          indicator.textContent = i;
+          label.className = 'ml-2 text-sm font-medium text-gray-500';
+        }
+      }
+
+      // Update buttons
+      prevBtn.classList.toggle('hidden', step === 1);
+      nextBtn.classList.toggle('hidden', step === totalSteps);
+      submitBtn.classList.toggle('hidden', step !== totalSteps);
+
+      // Re-initialize icons after DOM changes
+      lucide.createIcons();
+    }
+
+    // Next button click
+    nextBtn.addEventListener('click', () => {
+      if (validateCurrentStep()) {
+        currentStep++;
+        showStep(currentStep);
+      }
+    });
+
+    // Previous button click
+    prevBtn.addEventListener('click', () => {
+      currentStep--;
+      showStep(currentStep);
+    });
+
+    // Form validation for current step
+    function validateCurrentStep() {
+      const currentStepElement = document.getElementById(`step-${currentStep}`);
+      const requiredFields = currentStepElement.querySelectorAll('[required]');
+      let isValid = true;
+
+      requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+          field.classList.add('border-red-500');
+          isValid = false;
+        } else {
+          field.classList.remove('border-red-500');
+        }
+      });
+
+      if (!isValid) {
+        alert('Please fill in all required fields before continuing.');
+      }
+
+      return isValid;
+    }
+
+    // BMI calculation
+    function calculateBMI() {
+      const height = parseFloat(document.getElementById('height').value);
+      const weight = parseFloat(document.getElementById('weight').value);
+      const bmiDisplay = document.querySelector('[data-id="bmi-display"]');
+
+      if (height && weight) {
+        const heightInMeters = height / 100;
+        const bmi = (weight / (heightInMeters * heightInMeters)).toFixed(1);
+        
+        let category = '';
+        if (bmi < 18.5) category = 'Underweight';
+        else if (bmi < 25) category = 'Normal';
+        else if (bmi < 30) category = 'Overweight';
+        else category = 'Obese';
+
+        bmiDisplay.textContent = `${bmi} (${category})`;
+        bmiDisplay.className = bmiDisplay.className.replace('text-gray-600', 'text-blue-600 font-medium');
+      } else {
+        bmiDisplay.textContent = 'Enter height and weight to calculate BMI';
+        bmiDisplay.className = bmiDisplay.className.replace('text-blue-600 font-medium', 'text-gray-600');
+      }
+    }
+
+    // Add BMI calculation listeners
+    document.getElementById('height').addEventListener('input', calculateBMI);
+    document.getElementById('weight').addEventListener('input', calculateBMI);
+
+    function formatIndianPhoneNumber(input) {
+  const prefix = '+91-';
+
+  input.addEventListener('input', (e) => {
+    let value = e.target.value;
+
+    // Remove prefix first if it exists
+    if (value.startsWith(prefix)) {
+      value = value.slice(prefix.length);
+    }
+
+    // Remove non-digit chars
+    let digits = value.replace(/\D/g, '');
+
+    // Limit digits to max 10
+    if (digits.length > 10) {
+      digits = digits.slice(0, 10);
+    }
+
+    // Set new formatted value with prefix
+    const newValue = prefix + digits;
+
+    // Save cursor position relative to digits
+    let cursorPos = e.target.selectionStart;
+    const prevValue = e.target.value;
+
+    // Calculate how many non-digit chars before cursor in prevValue
+    let nonDigitBeforeCursor = 0;
+    for (let i = 0; i < cursorPos; i++) {
+      if (prevValue[i] && /\D/.test(prevValue[i]) && !prevValue.startsWith(prefix, i - prefix.length + 1)) {
+        nonDigitBeforeCursor++;
+      }
+    }
+
+    // Update input value
+    e.target.value = newValue;
+
+    // Calculate new cursor position:
+    // cursor should be at prefix length + digits typed before cursor - non-digit chars
+    let newCursorPos = prefix.length + (cursorPos - prefix.length - nonDigitBeforeCursor);
+
+    // Clamp cursor position inside value length
+    if (newCursorPos < prefix.length) newCursorPos = prefix.length;
+    if (newCursorPos > newValue.length) newCursorPos = newValue.length;
+
+    // Set cursor position
+    e.target.setSelectionRange(newCursorPos, newCursorPos);
+  });
+
+  // Prevent deleting prefix
+  input.addEventListener('keydown', (e) => {
+    if ((e.key === 'Backspace' || e.key === 'Delete') && input.selectionStart <= prefix.length) {
+      e.preventDefault();
+    }
+  });
+
+  // Ensure prefix exists on focus and set cursor properly
+  input.addEventListener('focus', (e) => {
+    if (!e.target.value.startsWith(prefix)) {
+      e.target.value = prefix;
+    }
+    setTimeout(() => {
+      if (e.target.selectionStart < prefix.length) {
+        e.target.setSelectionRange(prefix.length, prefix.length);
+      }
+    }, 0);
+  });
+
+  // On blur, if only prefix, clear input
+  input.addEventListener('blur', (e) => {
+    if (e.target.value === prefix) {
+      e.target.value = '';
+    }
+  });
+}
+
+// Apply the formatter
+formatIndianPhoneNumber(document.getElementById('contact'));
+formatIndianPhoneNumber(document.getElementById('relation_phone'));
+
+
+    // Form submission validation
+    form.addEventListener('submit', (e) => {
+      if (!validateCurrentStep()) {
+        e.preventDefault();
+      } else {
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 inline mr-2 animate-spin"></i> Registering...';
+        lucide.createIcons();
+      }
+    });
+
+    // Initialize first step
+    showStep(1);
+
+    // Input validation styling
+    document.querySelectorAll('input, select').forEach(input => {
+      input.addEventListener('blur', () => {
+        if (input.hasAttribute('required') && !input.value.trim()) {
+          input.classList.add('border-red-500');
+        } else {
+          input.classList.remove('border-red-500');
+        }
+      });
+
+      input.addEventListener('input', () => {
+        if (input.classList.contains('border-red-500') && input.value.trim()) {
+          input.classList.remove('border-red-500');
+        }
+      });
+    });
+
+    // Age validation
+    document.getElementById('age').addEventListener('input', (e) => {
+      const age = parseInt(e.target.value);
+      if (age && (age < 16 || age > 100)) {
+        e.target.classList.add('border-red-500');
+      } else {
+        e.target.classList.remove('border-red-500');
+      }
+    });
+
+    // Password strength indicator
+    document.getElementById('password').addEventListener('input', (e) => {
+      const password = e.target.value;
+      let strength = 0;
+      
+      if (password.length >= 8) strength++;
+      if (/[A-Z]/.test(password)) strength++;
+      if (/[a-z]/.test(password)) strength++;
+      if (/\d/.test(password)) strength++;
+      if (/[^A-Za-z\d]/.test(password)) strength++;
+
+      const colors = ['border-red-500', 'border-orange-500', 'border-yellow-500', 'border-blue-500', 'border-green-500'];
+      e.target.className = e.target.className.replace(/border-(red|orange|yellow|blue|green)-500/g, '');
+      
+      if (password.length > 0) {
+        e.target.classList.add(colors[Math.min(strength, 4)]);
+      }
+    });
+  </script>
+</body>
+</html>

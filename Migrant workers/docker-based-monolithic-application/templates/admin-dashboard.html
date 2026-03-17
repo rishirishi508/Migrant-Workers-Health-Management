@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Digital Health Records</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://use.typekit.net/yjp3aho.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: "sofia-pro", sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-sm border-b" data-id="admin-nav">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <h1 class="text-xl font-semibold text-gray-900" data-id="nav-title">Admin Dashboard</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span class="text-sm text-gray-500" data-id="admin-email-display">
+            System Administrator
+          </span>
+          <a href="{{ url_for('logout') }}" 
+             class="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
+             data-id="logout-link">
+            Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header Section -->
+    <div class="mb-8" data-id="dashboard-header">
+      <h1 class="text-3xl font-bold text-gray-900" data-id="welcome-message">
+        System Administration Panel
+      </h1>
+      <p class="mt-2 text-gray-600" data-id="dashboard-subtitle">
+        Monitor system statistics, audit access logs, and manage security events
+      </p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8" data-id="stats-grid">
+      <div class="bg-white rounded-lg shadow p-6" data-id="total-workers-card">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i data-lucide="users" class="w-8 h-8 text-blue-600"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500" data-id="total-workers-label">Total Workers</p>
+            <p class="text-2xl font-bold text-gray-900" data-id="total-workers-count">
+              {{ stats.total_workers if stats else 0 }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6" data-id="treated-workers-card">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i data-lucide="heart-pulse" class="w-8 h-8 text-green-600"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500" data-id="treated-workers-label">Workers Treated</p>
+            <p class="text-2xl font-bold text-gray-900" data-id="treated-workers-count">
+              {{ stats.treated_workers if stats else 0 }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6" data-id="total-doctors-card">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i data-lucide="stethoscope" class="w-8 h-8 text-purple-600"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500" data-id="total-doctors-label">Active Doctors</p>
+            <p class="text-2xl font-bold text-gray-900" data-id="total-doctors-count">
+              {{ stats.total_doctors if stats else 0 }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6" data-id="break-glass-events-card">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i data-lucide="alert-triangle" class="w-8 h-8 text-red-600"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500" data-id="break-glass-events-label">Emergency Access</p>
+            <p class="text-2xl font-bold text-gray-900" data-id="break-glass-events-count">
+              {{ break_glass_events|length if break_glass_events else 0 }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Main Content Area -->
+      <div class="lg:col-span-2 space-y-6" data-id="main-content">
+        <!-- Worker Search/Filter -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900" data-id="worker-search-title">Worker Information Search</h3>
+          </div>
+          <div class="p-6">
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="keyword_search" class="block text-sm font-medium text-gray-700 mb-2" data-id="keyword-search-label">
+                    Search by Keywords
+                  </label>
+                  <input type="text" 
+                         id="keyword_search" 
+                         placeholder="e.g., heart surgery, diabetes, lung cancer"
+                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                         data-id="keyword-search-input">
+                </div>
+                <div>
+                  <label for="worker_id_search" class="block text-sm font-medium text-gray-700 mb-2" data-id="worker-id-search-label">
+                    Search by Worker ID
+                  </label>
+                  <input type="text" 
+                         id="worker_id_search" 
+                         placeholder="Enter specific Worker ID"
+                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                         data-id="worker-id-search-input">
+                </div>
+              </div>
+              <div class="flex space-x-3">
+                <button onclick="searchByKeywords()" 
+                        class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                        data-id="keyword-search-btn">
+                  Search Keywords
+                </button>
+                <button onclick="searchByWorkerID()" 
+                        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        data-id="worker-id-search-btn">
+                  Find Worker
+                </button>
+                <button onclick="clearSearch()" 
+                        class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                        data-id="clear-search-btn">
+                  Clear
+                </button>
+              </div>
+              
+              <!-- Search Results -->
+              <div id="admin-search-results" class="hidden" data-id="admin-search-results">
+                <div class="border rounded-lg p-4 bg-gray-50">
+                  <h4 class="font-medium text-gray-900 mb-3" data-id="search-results-title">Search Results:</h4>
+                  <div id="search-results-content" class="space-y-3" data-id="search-results-content">
+                    <!-- Results will be populated here -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Break Glass Access Events -->
+        {% if break_glass_events %}
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900" data-id="break-glass-title">Emergency Access Events</h3>
+            <p class="text-sm text-gray-500 mt-1" data-id="break-glass-subtitle">
+              Recent emergency access events requiring attention
+            </p>
+          </div>
+          <div class="p-6">
+            <div class="space-y-4">
+              {% for event in break_glass_events %}
+              <div class="border-l-4 border-red-500 pl-4 py-3 bg-red-50 rounded-r-lg" data-id="break-glass-event-{{ loop.index }}">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <p class="font-medium text-gray-900" data-id="event-doctor-{{ loop.index }}">
+                      Dr. {{ event.doctor_name }}
+                    </p>
+                    <p class="text-sm text-gray-600" data-id="event-worker-{{ loop.index }}">
+                      Accessed: {{ event.worker_name }} (Worker ID: {{ event.worker_id }})
+                    </p>
+                    <p class="text-sm text-red-700 mt-1" data-id="event-reason-{{ loop.index }}">
+                      <strong>Reason:</strong> {{ event.reason }}
+                    </p>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-xs text-gray-400" data-id="event-time-{{ loop.index }}">
+                      {{ event.access_time.strftime('%Y-%m-%d %H:%M') }}
+                    </span>
+                    <div class="mt-1">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
+                            data-id="event-status-{{ loop.index }}">
+                        Emergency Access
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-2 flex space-x-2">
+                  <button class="text-xs bg-white text-red-700 px-3 py-1 rounded border border-red-300 hover:bg-red-50 transition-colors"
+                          onclick="reviewEvent({{ event.log_id }})"
+                          data-id="review-event-btn-{{ loop.index }}">
+                    Review Event
+                  </button>
+                  <button class="text-xs bg-white text-gray-700 px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 transition-colors"
+                          onclick="notifyStakeholders({{ event.log_id }})"
+                          data-id="notify-stakeholders-btn-{{ loop.index }}">
+                    Send Notification
+                  </button>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- System Health -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900" data-id="system-health-title">System Health Monitor</h3>
+          </div>
+          <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="text-center">
+                <div class="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-2">
+                  <i data-lucide="database" class="w-6 h-6 text-green-600"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-900" data-id="database-status-label">Database</p>
+                <p class="text-xs text-green-600" data-id="database-status">Online</p>
+              </div>
+              <div class="text-center">
+                <div class="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-2">
+                  <i data-lucide="shield-check" class="w-6 h-6 text-green-600"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-900" data-id="security-status-label">Security</p>
+                <p class="text-xs text-green-600" data-id="security-status">Secure</p>
+              </div>
+              <div class="text-center">
+                <div class="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-2">
+                  <i data-lucide="server" class="w-6 h-6 text-green-600"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-900" data-id="server-status-label">Server</p>
+                <p class="text-xs text-green-600" data-id="server-status">Running</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Sidebar -->
+      <div class="space-y-6" data-id="admin-sidebar">
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900" data-id="admin-actions-title">Admin Actions</h3>
+          </div>
+          <div class="p-6 space-y-3">
+            <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                    data-id="export-logs-btn" onclick="exportLogs()">
+              <i data-lucide="download" class="w-4 h-4 inline mr-3 text-gray-400"></i>
+              Export Access Logs
+            </button>
+            <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                    data-id="system-backup-btn" onclick="systemBackup()">
+              <i data-lucide="hard-drive" class="w-4 h-4 inline mr-3 text-gray-400"></i>
+              System Backup
+            </button>
+            <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                    data-id="security-audit-btn" onclick="securityAudit()">
+              <i data-lucide="shield" class="w-4 h-4 inline mr-3 text-gray-400"></i>
+              Security Audit
+            </button>
+            <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                    data-id="manage-users-btn" onclick="manageUsers()">
+              <i data-lucide="users-cog" class="w-4 h-4 inline mr-3 text-gray-400"></i>
+              Manage Users
+            </button>
+          </div>
+        </div>
+
+        <!-- Risk Distribution -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900" data-id="risk-distribution-title">Risk Distribution</h3>
+          </div>
+          <div class="p-6">
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700" data-id="high-risk-label">High Risk</span>
+                <div class="flex items-center">
+                  <div class="w-20 bg-gray-200 rounded-full h-2 mr-2">
+                    <div class="bg-red-600 h-2 rounded-full" style="width: 15%" data-id="high-risk-bar"></div>
+                  </div>
+                  <span class="text-sm text-gray-900" data-id="high-risk-count">12</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700" data-id="medium-risk-label">Medium Risk</span>
+                <div class="flex items-center">
+                  <div class="w-20 bg-gray-200 rounded-full h-2 mr-2">
+                    <div class="bg-yellow-500 h-2 rounded-full" style="width: 35%" data-id="medium-risk-bar"></div>
+                  </div>
+                  <span class="text-sm text-gray-900" data-id="medium-risk-count">28</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700" data-id="low-risk-label">Low Risk</span>
+                <div class="flex items-center">
+                  <div class="w-20 bg-gray-200 rounded-full h-2 mr-2">
+                    <div class="bg-green-500 h-2 rounded-full" style="width: 50%" data-id="low-risk-bar"></div>
+                  </div>
+                  <span class="text-sm text-gray-900" data-id="low-risk-count">40</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Alerts -->
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div class="p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-yellow-600"></i>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-yellow-800" data-id="system-alerts-title">System Alerts</h3>
+                <div class="mt-2 text-sm text-yellow-700">
+                  <ul class="list-disc pl-5 space-y-1">
+                    <li data-id="alert-backup">Last backup: 2 days ago</li>
+                    <li data-id="alert-updates">System updates available</li>
+                    <li data-id="alert-storage">Storage usage: 78%</li>
+                  </ul>
+                </div>
+                <div class="mt-3">
+                  <button class="text-sm bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700 transition-colors"
+                          onclick="viewSystemAlerts()"
+                          data-id="view-alerts-btn">
+                    View All Alerts
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Mock data for demonstration
+    const mockWorkerData = [
+      { id: 'MW123456', name: 'John Smith', age: 32, keywords: ['heart surgery', 'diabetes'] },
+      { id: 'MW234567', name: 'Maria Garcia', age: 28, keywords: ['lung cancer', 'respiratory'] },
+      { id: 'MW345678', name: 'Ahmad Hassan', age: 45, keywords: ['heart surgery', 'hypertension'] },
+      { id: 'MW456789', name: 'Li Wei', age: 38, keywords: ['diabetes', 'vision problems'] }
+    ];
+
+    // Search by keywords function
+    window.searchByKeywords = function() {
+      const keywords = document.getElementById('keyword_search').value.toLowerCase().trim();
+      const resultsContainer = document.getElementById('admin-search-results');
+      const resultsContent = document.getElementById('search-results-content');
+
+      if (!keywords) {
+        alert('Please enter keywords to search');
+        return;
+      }
+
+      // Mock search - filter workers by keywords
+      const results = mockWorkerData.filter(worker => 
+        worker.keywords.some(keyword => keyword.toLowerCase().includes(keywords))
+      );
+
+      if (results.length > 0) {
+        resultsContent.innerHTML = results.map(worker => `
+          <div class="border rounded p-3">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="font-medium">${worker.name}</p>
+                <p class="text-sm text-gray-600">Worker ID: ${worker.id}</p>
+                <p class="text-sm text-gray-600">Age: ${worker.age} years</p>
+                <p class="text-xs text-blue-600 mt-1">Keywords: ${worker.keywords.join(', ')}</p>
+              </div>
+              <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Match Found</span>
+            </div>
+          </div>
+        `).join('');
+
+        resultsContainer.classList.remove('hidden');
+      } else {
+        resultsContent.innerHTML = '<p class="text-gray-500">No workers found with matching keywords.</p>';
+        resultsContainer.classList.remove('hidden');
+      }
+    };
+
+    // Search by Worker ID function
+    window.searchByWorkerID = function() {
+      const workerId = document.getElementById('worker_id_search').value.trim().toUpperCase();
+      const resultsContainer = document.getElementById('admin-search-results');
+      const resultsContent = document.getElementById('search-results-content');
+
+      if (!workerId) {
+        alert('Please enter a Worker ID');
+        return;
+      }
+
+      // Mock search - find specific worker
+      const worker = mockWorkerData.find(w => w.id === workerId);
+
+      if (worker) {
+        resultsContent.innerHTML = `
+          <div class="border rounded p-4 bg-blue-50">
+            <h4 class="font-medium text-gray-900 mb-2">Worker Information (Basic Details Only)</h4>
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div><dt class="text-sm text-gray-500">Name:</dt><dd class="font-medium">${worker.name}</dd></div>
+              <div><dt class="text-sm text-gray-500">Worker ID:</dt><dd>${worker.id}</dd></div>
+              <div><dt class="text-sm text-gray-500">Age:</dt><dd>${worker.age} years</dd></div>
+              <div><dt class="text-sm text-gray-500">Status:</dt><dd class="text-green-600">Active</dd></div>
+            </dl>
+            <div class="mt-3 text-xs text-gray-500">
+              <p><strong>Note:</strong> Full medical records are not accessible from admin portal for privacy protection.</p>
+            </div>
+          </div>
+        `;
+
+        resultsContainer.classList.remove('hidden');
+      } else {
+        resultsContent.innerHTML = '<p class="text-red-500">Worker ID not found in the system.</p>';
+        resultsContainer.classList.remove('hidden');
+      }
+    };
+
+    // Clear search function
+    window.clearSearch = function() {
+      document.getElementById('keyword_search').value = '';
+      document.getElementById('worker_id_search').value = '';
+      document.getElementById('admin-search-results').classList.add('hidden');
+    };
+
+    // Break glass event functions
+    window.reviewEvent = function(eventId) {
+      alert(`Reviewing emergency access event ID: ${eventId}\n\nThis would open a detailed review interface showing:\n- Complete access timeline\n- Doctor credentials verification\n- Patient consent status\n- Regulatory compliance check`);
+    };
+
+    window.notifyStakeholders = function(eventId) {
+      alert(`Sending notifications for event ID: ${eventId}\n\nNotifications will be sent to:\n- Healthcare oversight committee\n- Patient privacy officer\n- System security team\n- Compliance department`);
+    };
+
+    // Admin action functions
+    window.exportLogs = function() {
+      alert('Access logs export initiated.\n\nThis would generate a comprehensive audit report including:\n- All access events\n- Break glass incidents\n- Login/logout records\n- System security events');
+    };
+
+    window.systemBackup = function() {
+      if (confirm('Initiate system backup? This may take several minutes.')) {
+        alert('System backup started.\n\nBackup includes:\n- All medical records (encrypted)\n- User accounts\n- Access logs\n- System configuration\n\nYou will be notified when complete.');
+      }
+    };
+
+    window.securityAudit = function() {
+      alert('Security audit initiated.\n\nAudit will check:\n- User permission levels\n- Password policies\n- Encryption status\n- Access pattern analysis\n- Vulnerability assessment');
+    };
+
+    window.manageUsers = function() {
+      alert('User management interface coming soon.\n\nThis will allow:\n- View all registered users\n- Modify user permissions\n- Deactivate accounts\n- Reset passwords\n- Audit user activity');
+    };
+
+    window.viewSystemAlerts = function() {
+      alert('System Alerts Dashboard\n\n🔄 Scheduled backup overdue\n⚠️ Security updates available\n💾 Storage capacity warning\n🔍 Unusual access patterns detected\n📊 Performance optimization needed');
+    };
+
+    // Auto-format Worker ID input
+    document.getElementById('worker_id_search').addEventListener('input', (e) => {
+      let value = e.target.value.toUpperCase();
+      value = value.replace(/[^MW0-9]/g, '');
+      if (value.length > 0 && !value.startsWith('MW')) {
+        value = 'MW' + value.replace(/MW/g, '');
+      }
+      if (value.length > 8) {
+        value = value.substring(0, 8);
+      }
+      e.target.value = value;
+    });
+
+    // Enter key search
+    document.getElementById('keyword_search').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        searchByKeywords();
+      }
+    });
+
+    document.getElementById('worker_id_search').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        searchByWorkerID();
+      }
+    });
+  </script>
+</body>
+</html>

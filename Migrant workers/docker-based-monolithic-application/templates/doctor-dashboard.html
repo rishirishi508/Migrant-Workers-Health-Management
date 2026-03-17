@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Dashboard - Digital Health Records</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://use.typekit.net/yjp3aho.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: "sofia-pro", sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-sm border-b" data-id="doctor-nav">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <h1 class="text-xl font-semibold text-gray-900" data-id="nav-title">Doctor Dashboard</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span class="text-sm text-gray-500" data-id="doctor-name-display">
+            Dr. {{ doctor.name if doctor else 'Doctor' }}
+          </span>
+          <a href="{{ url_for('logout') }}" 
+             class="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
+             data-id="logout-link">
+            Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header Section -->
+    <div class="mb-8" data-id="dashboard-header">
+      <h1 class="text-3xl font-bold text-gray-900" data-id="welcome-message">
+        Welcome, Dr. {{ doctor.name if doctor else 'Doctor' }}
+      </h1>
+      <p class="mt-2 text-gray-600" data-id="dashboard-subtitle">
+        Access patient records and manage healthcare data securely
+      </p>
+    </div>
+
+    <!-- Stats Grid -->
+    {% if doctor %}
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8" data-id="stats-grid">
+      <div class="bg-white rounded-lg shadow p-6" data-id="doctor-info-card">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i data-lucide="user-check" class="w-8 h-8 text-green-600"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500" data-id="doctor-info-label">Specialization</p>
+            <p class="text-lg font-semibold text-gray-900" data-id="doctor-specialization">
+              {{ doctor.specialization }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6" data-id="license-card">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i data-lucide="award" class="w-8 h-8 text-blue-600"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500" data-id="license-label">License Number</p>
+            <p class="text-lg font-semibold text-gray-900" data-id="license-number">
+              {{ doctor.license_number }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6" data-id="contact-card">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i data-lucide="phone" class="w-8 h-8 text-purple-600"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500" data-id="contact-label">Contact</p>
+            <p class="text-lg font-semibold text-gray-900" data-id="doctor-contact">
+              {{ doctor.contact }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6" data-id="access-count-card">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i data-lucide="activity" class="w-8 h-8 text-orange-600"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500" data-id="access-count-label">Recent Access</p>
+            <p class="text-lg font-semibold text-gray-900" data-id="access-count">
+              {{ recent_access|length if recent_access else 0 }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Patient Search & Access -->
+      <div class="lg:col-span-2 space-y-6" data-id="patient-search-section">
+        <!-- Patient Search -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900" data-id="search-title">Patient Search</h3>
+          </div>
+          <div class="p-6">
+            <div class="space-y-4">
+              <div>
+                <label for="worker_search" class="block text-sm font-medium text-gray-700 mb-2" data-id="search-label">
+                  Search by Worker ID
+                </label>
+                <div class="flex space-x-3">
+                  <input type="text" 
+                         id="worker_search" 
+                         placeholder="Enter Worker ID (e.g., MW123456)"
+                         class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                         data-id="search-input">
+                  <button onclick="searchWorker()" 
+                          class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                          data-id="search-btn">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Search Results -->
+              <div id="search-results" class="hidden" data-id="search-results">
+                <div class="border rounded-lg p-4 bg-gray-50">
+                  <h4 class="font-medium text-gray-900 mb-2" data-id="search-results-title">Worker Found:</h4>
+                  <div id="worker-basic-info" class="space-y-2" data-id="worker-basic-info">
+                    <!-- Basic info will be populated here -->
+                  </div>
+                  <div class="mt-4 flex space-x-3">
+                    <button onclick="requestAccess()" 
+                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                            data-id="request-access-btn">
+                      Request Access (OTP)
+                    </button>
+                    <button onclick="breakGlassAccess()" 
+                            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm"
+                            data-id="break-glass-btn">
+                      Emergency Access
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- OTP Verification Modal (Hidden by default) -->
+        <div id="otp-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-id="otp-modal">
+          <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 class="text-lg font-medium text-gray-900 mb-4" data-id="otp-modal-title">OTP Verification Required</h3>
+            <p class="text-sm text-gray-600 mb-4" data-id="otp-modal-description">
+              An OTP has been sent to the worker and their emergency contact. Please enter the OTP to access the medical records.
+            </p>
+            <div class="space-y-4">
+              <input type="text" 
+                     id="otp_input" 
+                     placeholder="Enter 6-digit OTP"
+                     maxlength="6"
+                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                     data-id="otp-input">
+              <div class="flex space-x-3">
+                <button onclick="verifyOTP()" 
+                        class="flex-1 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                        data-id="verify-otp-btn">
+                  Verify OTP
+                </button>
+                <button onclick="closeOTPModal()" 
+                        class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors"
+                        data-id="cancel-otp-btn">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Break Glass Modal (Hidden by default) -->
+        <div id="break-glass-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-id="break-glass-modal">
+          <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 class="text-lg font-medium text-red-600 mb-4" data-id="break-glass-modal-title">Emergency Access Warning</h3>
+            <p class="text-sm text-gray-600 mb-4" data-id="break-glass-modal-description">
+              You are about to access patient records without consent. This action will be logged and notifications will be sent.
+            </p>
+            <div class="space-y-4">
+              <textarea id="emergency_reason" 
+                        placeholder="Please provide a reason for emergency access..."
+                        rows="3"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                        data-id="emergency-reason-input"></textarea>
+              <div class="flex space-x-3">
+                <button onclick="confirmBreakGlass()" 
+                        class="flex-1 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                        data-id="confirm-break-glass-btn">
+                  Confirm Emergency Access
+                </button>
+                <button onclick="closeBreakGlassModal()" 
+                        class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors"
+                        data-id="cancel-break-glass-btn">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Patient Records Display (Hidden by default) -->
+        <div id="patient-records" class="hidden" data-id="patient-records">
+          <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h3 class="text-lg font-medium text-gray-900" data-id="patient-records-title">Patient Medical Records</h3>
+            </div>
+            <div class="p-6">
+              <div id="patient-details" data-id="patient-details">
+                <!-- Patient details will be populated here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Access History -->
+        {% if recent_access %}
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900" data-id="access-history-title">Recent Access History</h3>
+          </div>
+          <div class="p-6">
+            <div class="space-y-4">
+              {% for access in recent_access %}
+              <div class="border-l-4 {{ 'border-red-500' if access.access_type == 'BREAK_GLASS' else 'border-green-500' }} pl-4 py-2" data-id="access-record-{{ loop.index }}">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <p class="font-medium text-gray-900" data-id="access-worker-name-{{ loop.index }}">{{ access.worker_name }}</p>
+                    <p class="text-sm text-gray-600" data-id="access-type-{{ loop.index }}">
+                      {{ 'Emergency Access' if access.access_type == 'BREAK_GLASS' else 'Consent Verified' }}
+                    </p>
+                    {% if access.reason %}
+                    <p class="text-sm text-gray-500 mt-1" data-id="access-reason-{{ loop.index }}">{{ access.reason }}</p>
+                    {% endif %}
+                  </div>
+                  <span class="text-xs text-gray-400" data-id="access-time-{{ loop.index }}">
+                    {{ access.access_time.strftime('%Y-%m-%d %H:%M') }}
+                  </span>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Right Sidebar -->
+      <div class="space-y-6" data-id="sidebar">
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900" data-id="quick-actions-title">Quick Actions</h3>
+          </div>
+          <div class="p-6 space-y-3">
+            <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                    data-id="scan-qr-btn" onclick="scanQR()">
+              <i data-lucide="qr-code" class="w-4 h-4 inline mr-3 text-gray-400"></i>
+              Scan QR Code
+            </button>
+            <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                    data-id="add-record-btn" onclick="addRecord()">
+              <i data-lucide="plus-circle" class="w-4 h-4 inline mr-3 text-gray-400"></i>
+              Add Medical Record
+            </button>
+            <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                    data-id="export-data-btn" onclick="exportData()">
+              <i data-lucide="download" class="w-4 h-4 inline mr-3 text-gray-400"></i>
+              Export Data
+            </button>
+          </div>
+        </div>
+
+        <!-- AI Risk Assessment -->
+        <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow text-white">
+          <div class="p-6">
+            <h3 class="text-lg font-medium mb-3" data-id="ai-risk-title">AI Risk Assessment</h3>
+            <p class="text-sm opacity-90 mb-4" data-id="ai-risk-description">
+              Get AI-powered health risk evaluations for your patients
+            </p>
+            <button class="w-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                    onclick="startRiskAssessment()"
+                    data-id="risk-assessment-btn">
+              <i data-lucide="activity" class="w-4 h-4 inline mr-2"></i>
+              Start Assessment
+            </button>
+          </div>
+        </div>
+
+        <!-- Emergency Contacts -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900" data-id="emergency-contacts-title">Emergency Contacts</h3>
+          </div>
+          <div class="p-6 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-gray-700" data-id="ambulance-label">Ambulance</span>
+              <a href="tel:911" class="text-red-600 hover:text-red-800 font-medium" data-id="ambulance-number">911</a>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-gray-700" data-id="poison-control-label">Poison Control</span>
+              <a href="tel:1-800-222-1222" class="text-red-600 hover:text-red-800 font-medium" data-id="poison-control-number">1-800-222-1222</a>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-gray-700" data-id="hospital-label">Local Hospital</span>
+              <a href="tel:555-0199" class="text-red-600 hover:text-red-800 font-medium" data-id="hospital-number">555-0199</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    let currentWorkerData = null;
+
+    // Search worker function
+    window.searchWorker = async function() {
+      const workerId = document.getElementById('worker_search').value.trim();
+      const searchResults = document.getElementById('search-results');
+      const workerBasicInfo = document.getElementById('worker-basic-info');
+
+      if (!workerId) {
+        alert('Please enter a Worker ID');
+        return;
+      }
+
+      try {
+        const response = await fetch('/doctor/search', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ worker_id: workerId })
+        });
+
+        if (response.ok) {
+          const worker = await response.json();
+          currentWorkerData = worker;
+          
+          // Display basic info
+          workerBasicInfo.innerHTML = `
+            <p><strong>Name:</strong> ${worker.name}</p>
+            <p><strong>Age:</strong> ${worker.age} years</p>
+            <p><strong>Gender:</strong> ${worker.gender}</p>
+            <p><strong>Contact:</strong> ${worker.contact}</p>
+            <p><strong>Registration:</strong> ${new Date(worker.created_at).toLocaleDateString()}</p>
+          `;
+          
+          searchResults.classList.remove('hidden');
+        } else {
+          const error = await response.json();
+          alert(error.error || 'Worker not found');
+          searchResults.classList.add('hidden');
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+        alert('Search failed. Please try again.');
+      }
+    };
+
+    // Request OTP access
+    window.requestAccess = async function() {
+      if (!currentWorkerData) return;
+
+      try {
+        const response = await fetch('/doctor/request-access', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ worker_id: currentWorkerData.worker_id })
+        });
+
+        if (response.ok) {
+          document.getElementById('otp-modal').classList.remove('hidden');
+        } else {
+          const error = await response.json();
+          alert(error.error || 'Failed to request access');
+        }
+      } catch (error) {
+        console.error('Request access error:', error);
+        alert('Request failed. Please try again.');
+      }
+    };
+
+    // Verify OTP
+    window.verifyOTP = async function() {
+      const otp = document.getElementById('otp_input').value.trim();
+      
+      if (!otp || otp.length !== 6) {
+        alert('Please enter a valid 6-digit OTP');
+        return;
+      }
+
+      try {
+        const response = await fetch('/doctor/verify-otp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            worker_id: currentWorkerData.worker_id,
+            otp: otp 
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          displayPatientRecords(data);
+          closeOTPModal();
+        } else {
+          const error = await response.json();
+          alert(error.error || 'Invalid OTP');
+        }
+      } catch (error) {
+        console.error('OTP verification error:', error);
+        alert('Verification failed. Please try again.');
+      }
+    };
+
+    // Break glass access
+    window.breakGlassAccess = function() {
+      document.getElementById('break-glass-modal').classList.remove('hidden');
+    };
+
+    // Confirm break glass access
+    window.confirmBreakGlass = async function() {
+      const reason = document.getElementById('emergency_reason').value.trim();
+      
+      if (!reason) {
+        alert('Please provide a reason for emergency access');
+        return;
+      }
+
+      try {
+        const response = await fetch('/doctor/break-glass', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            worker_id: currentWorkerData.worker_id,
+            reason: reason 
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          displayPatientRecords(data);
+          closeBreakGlassModal();
+        } else {
+          const error = await response.json();
+          alert(error.error || 'Emergency access failed');
+        }
+      } catch (error) {
+        console.error('Break glass error:', error);
+        alert('Emergency access failed. Please try again.');
+      }
+    };
+
+    // Display patient records
+    function displayPatientRecords(data) {
+      const patientRecords = document.getElementById('patient-records');
+      const patientDetails = document.getElementById('patient-details');
+      
+      const worker = data.worker;
+      const records = data.records || [];
+
+      patientDetails.innerHTML = `
+        <div class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h4 class="font-medium text-gray-900 mb-3">Personal Information</h4>
+              <dl class="space-y-2">
+                <div><dt class="text-sm text-gray-500">Name:</dt><dd class="font-medium">${worker.name}</dd></div>
+                <div><dt class="text-sm text-gray-500">Age:</dt><dd>${worker.age} years</dd></div>
+                <div><dt class="text-sm text-gray-500">Gender:</dt><dd>${worker.gender}</dd></div>
+                <div><dt class="text-sm text-gray-500">Blood Group:</dt><dd>${worker.blood_group}</dd></div>
+                <div><dt class="text-sm text-gray-500">Height:</dt><dd>${worker.height} cm</dd></div>
+                <div><dt class="text-sm text-gray-500">Weight:</dt><dd>${worker.weight} kg</dd></div>
+              </dl>
+            </div>
+            <div>
+              <h4 class="font-medium text-gray-900 mb-3">Contact Information</h4>
+              <dl class="space-y-2">
+                <div><dt class="text-sm text-gray-500">Phone:</dt><dd>${worker.contact}</dd></div>
+                <div><dt class="text-sm text-gray-500">Occupation:</dt><dd>${worker.occupation}</dd></div>
+                <div><dt class="text-sm text-gray-500">Emergency Contact:</dt><dd>${worker.relation_name} (${worker.relation_type})</dd></div>
+                <div><dt class="text-sm text-gray-500">Emergency Phone:</dt><dd>${worker.relation_phone}</dd></div>
+              </dl>
+            </div>
+          </div>
+          
+          ${records.length > 0 ? `
+            <div>
+              <h4 class="font-medium text-gray-900 mb-3">Medical Records</h4>
+              <div class="space-y-3">
+                ${records.map(record => `
+                  <div class="border rounded-lg p-4">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <p class="font-medium">${record.record_type || 'General Checkup'}</p>
+                        <p class="text-sm text-gray-600 mt-1">${record.notes || 'No additional notes'}</p>
+                      </div>
+                      <span class="text-xs text-gray-400">${new Date(record.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : '<p class="text-gray-500">No medical records found.</p>'}
+        </div>
+      `;
+      
+      patientRecords.classList.remove('hidden');
+    }
+
+    // Modal controls
+    window.closeOTPModal = function() {
+      document.getElementById('otp-modal').classList.add('hidden');
+      document.getElementById('otp_input').value = '';
+    };
+
+    window.closeBreakGlassModal = function() {
+      document.getElementById('break-glass-modal').classList.add('hidden');
+      document.getElementById('emergency_reason').value = '';
+    };
+
+    // Quick action functions
+    window.scanQR = function() {
+      alert('QR Code scanning feature coming soon! This will allow you to quickly access patient records by scanning their health card QR code.');
+    };
+
+    window.addRecord = function() {
+      alert('Add medical record feature coming soon! This will allow you to add new medical records for patients.');
+    };
+
+    window.exportData = function() {
+      alert('Data export feature coming soon! This will allow you to export patient data for reports.');
+    };
+
+    window.startRiskAssessment = function() {
+      alert('AI Risk Assessment coming soon! This will provide AI-powered health risk evaluations based on patient parameters.');
+    };
+
+    // Auto-format Worker ID input
+    document.getElementById('worker_search').addEventListener('input', (e) => {
+      let value = e.target.value.toUpperCase();
+      value = value.replace(/[^MW0-9]/g, '');
+      if (value.length > 0 && !value.startsWith('MW')) {
+        value = 'MW' + value.replace(/MW/g, '');
+      }
+      if (value.length > 8) {
+        value = value.substring(0, 8);
+      }
+      e.target.value = value;
+    });
+
+    // Enter key search
+    document.getElementById('worker_search').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        searchWorker();
+      }
+    });
+  </script>
+</body>
+</html>

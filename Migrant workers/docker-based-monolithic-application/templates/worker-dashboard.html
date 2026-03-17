@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Worker Dashboard - Digital Health Records</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://use.typekit.net/yjp3aho.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: "sofia-pro", sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-sm border-b" data-id="worker-nav">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <h1 class="text-xl font-semibold text-gray-900" data-id="nav-title">Worker Dashboard</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span class="text-sm text-gray-500" data-id="worker-id-display">ID: {{ worker.worker_id if worker else 'MW000000' }}</span>
+          <a href="{{ url_for('logout') }}" 
+             class="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
+             data-id="logout-link">
+            Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header Section -->
+    <div class="mb-8" data-id="dashboard-header">
+      <h1 class="text-3xl font-bold text-gray-900" data-id="welcome-message">
+        Welcome, {{ worker.name if worker else 'Worker' }}
+      </h1>
+      <p class="mt-2 text-gray-600" data-id="dashboard-subtitle">
+        Manage your health records and access your digital health card
+      </p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" data-id="stats-grid">
+      <div class="bg-white rounded-lg shadow p-6" data-id="worker-info-card">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i data-lucide="user" class="w-8 h-8 text-blue-600"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500" data-id="worker-info-label">Worker Information</p>
+            <p class="text-lg font-semibold text-gray-900" data-id="worker-age-gender">
+              {{ worker.age if worker else 'N/A' }} years, {{ worker.gender if worker else 'N/A' }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6" data-id="health-status-card">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i data-lucide="heart" class="w-8 h-8 text-red-600"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500" data-id="health-status-label">Health Status</p>
+            <p class="text-lg font-semibold text-green-600" data-id="health-status-value">
+              {{ 'Active' if worker else 'Inactive' }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6" data-id="last-checkup-card">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i data-lucide="calendar" class="w-8 h-8 text-green-600"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500" data-id="last-checkup-label">Last Checkup</p>
+            <p class="text-lg font-semibold text-gray-900" data-id="last-checkup-date">
+              {{ last_record.created_at.strftime('%Y-%m-%d') if last_record else 'No records' }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Personal Information -->
+      <div class="lg:col-span-2 space-y-6" data-id="personal-info-section">
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900" data-id="personal-info-title">Personal Information</h3>
+          </div>
+          <div class="p-6">
+            {% if worker %}
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <dt class="text-sm font-medium text-gray-500" data-id="name-label">Full Name</dt>
+                <dd class="mt-1 text-sm text-gray-900" data-id="worker-name">{{ worker.name }}</dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500" data-id="occupation-label">Occupation</dt>
+                <dd class="mt-1 text-sm text-gray-900" data-id="worker-occupation">{{ worker.occupation }}</dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500" data-id="contact-label">Contact</dt>
+                <dd class="mt-1 text-sm text-gray-900" data-id="worker-contact">{{ worker.contact }}</dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500" data-id="blood-group-label">Blood Group</dt>
+                <dd class="mt-1 text-sm text-gray-900" data-id="worker-blood-group">{{ worker.blood_group }}</dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500" data-id="height-label">Height</dt>
+                <dd class="mt-1 text-sm text-gray-900" data-id="worker-height">{{ worker.height }} cm</dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500" data-id="weight-label">Weight</dt>
+                <dd class="mt-1 text-sm text-gray-900" data-id="worker-weight">{{ worker.weight }} kg</dd>
+              </div>
+            </dl>
+            {% else %}
+            <p class="text-gray-500" data-id="no-worker-data">No worker information available</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Emergency Contact -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900" data-id="emergency-contact-title">Emergency Contact</h3>
+          </div>
+          <div class="p-6">
+            {% if worker %}
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <dt class="text-sm font-medium text-gray-500" data-id="relation-name-label">Contact Name</dt>
+                <dd class="mt-1 text-sm text-gray-900" data-id="relation-name">{{ worker.relation_name }}</dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500" data-id="relation-type-label">Relationship</dt>
+                <dd class="mt-1 text-sm text-gray-900" data-id="relation-type">{{ worker.relation_type }}</dd>
+              </div>
+              <div class="sm:col-span-2">
+                <dt class="text-sm font-medium text-gray-500" data-id="relation-phone-label">Phone Number</dt>
+                <dd class="mt-1 text-sm text-gray-900" data-id="relation-phone">{{ worker.relation_phone }}</dd>
+              </div>
+            </dl>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Last Medical Record -->
+        {% if last_record %}
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900" data-id="last-record-title">Last Medical Record</h3>
+          </div>
+          <div class="p-6">
+            <div class="space-y-3">
+              <div>
+                <span class="text-sm font-medium text-gray-500" data-id="record-date-label">Date:</span>
+                <span class="ml-2 text-sm text-gray-900" data-id="record-date">{{ last_record.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+              </div>
+              <div>
+                <span class="text-sm font-medium text-gray-500" data-id="record-type-label">Type:</span>
+                <span class="ml-2 text-sm text-gray-900" data-id="record-type">{{ last_record.record_type or 'General Checkup' }}</span>
+              </div>
+              <div>
+                <span class="text-sm font-medium text-gray-500" data-id="record-notes-label">Notes:</span>
+                <p class="mt-1 text-sm text-gray-900" data-id="record-notes">{{ last_record.notes or 'No additional notes' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Digital Health Card -->
+      <div class="space-y-6" data-id="health-card-section">
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900" data-id="health-card-title">Digital Health Card</h3>
+          </div>
+          <div class="p-6 text-center">
+            {% if qr_code %}
+            <div class="mb-4">
+              <img src="data:image/png;base64,{{ qr_code }}" 
+                   alt="QR Code" 
+                   class="w-32 h-32 mx-auto border rounded-lg"
+                   data-id="qr-code-image">
+            </div>
+            {% endif %}
+            <p class="text-sm text-gray-600 mb-4" data-id="qr-code-description">
+              Scan this QR code for quick access to your health record ID
+            </p>
+            <div class="space-y-3">
+              <a href="{{ url_for('download_health_card') }}" 
+                 class="block w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                 data-id="download-card-btn">
+                <i data-lucide="download" class="w-4 h-4 inline mr-2"></i>
+                Download Health Card
+              </a>
+              <button class="block w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                      onclick="printCard()"
+                      data-id="print-card-btn">
+                <i data-lucide="printer" class="w-4 h-4 inline mr-2"></i>
+                Print Card
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Health Assistant -->
+        <div class="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg shadow text-white">
+          <div class="p-6">
+            <h3 class="text-lg font-medium mb-3" data-id="ai-assistant-title">AI Health Assistant</h3>
+            <p class="text-sm opacity-90 mb-4" data-id="ai-assistant-description">
+              Get instant answers to health questions in your language
+            </p>
+            <button class="w-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                    onclick="startHealthChat()"
+                    data-id="start-chat-btn">
+              <i data-lucide="message-circle" class="w-4 h-4 inline mr-2"></i>
+              Start Health Chat
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900" data-id="quick-actions-title">Quick Actions</h3>
+          </div>
+          <div class="p-6 space-y-3">
+            <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                    data-id="view-full-records-btn">
+              <i data-lucide="file-text" class="w-4 h-4 inline mr-3 text-gray-400"></i>
+              View Full Medical Records
+            </button>
+            <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                    data-id="update-contact-btn">
+              <i data-lucide="edit" class="w-4 h-4 inline mr-3 text-gray-400"></i>
+              Update Contact Information
+            </button>
+            <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                    data-id="emergency-contact-btn">
+              <i data-lucide="phone" class="w-4 h-4 inline mr-3 text-red-400"></i>
+              Emergency Contacts
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Print card function
+    window.printCard = function() {
+      const cardSection = document.querySelector('[data-id="health-card-section"]');
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Health Card - {{ worker.worker_id if worker else 'MW000000' }}</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              .card { border: 2px solid #333; padding: 20px; max-width: 400px; }
+              .qr-code { text-align: center; margin: 20px 0; }
+            </style>
+          </head>
+          <body>
+            <div class="card">
+              <h2>Digital Health Card</h2>
+              <p><strong>Name:</strong> {{ worker.name if worker else 'N/A' }}</p>
+              <p><strong>Worker ID:</strong> {{ worker.worker_id if worker else 'MW000000' }}</p>
+              <p><strong>Blood Group:</strong> {{ worker.blood_group if worker else 'N/A' }}</p>
+              <div class="qr-code">
+                {% if qr_code %}
+                <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
+                {% endif %}
+              </div>
+              <p><strong>Emergency Contact:</strong> {{ worker.relation_name if worker else 'N/A' }}</p>
+              <p><strong>Phone:</strong> {{ worker.relation_phone if worker else 'N/A' }}</p>
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    };
+
+    // AI Health Assistant
+    window.startHealthChat = function() {
+      alert('AI Health Assistant is coming soon! This will provide multilingual support for health-related questions and risk assessments.');
+    };
+
+    // Quick actions
+    document.querySelector('[data-id="view-full-records-btn"]').addEventListener('click', () => {
+      alert('Full medical records view coming soon! This will show your complete health history.');
+    });
+
+    document.querySelector('[data-id="update-contact-btn"]').addEventListener('click', () => {
+      alert('Contact update feature coming soon! You will be able to update your contact information here.');
+    });
+
+    document.querySelector('[data-id="emergency-contact-btn"]').addEventListener('click', () => {
+      const emergencyContact = '{{ worker.relation_phone if worker else "N/A" }}';
+      if (emergencyContact && emergencyContact !== 'N/A') {
+        if (confirm(`Call emergency contact: ${emergencyContact}?`)) {
+          window.location.href = `tel:${emergencyContact}`;
+        }
+      } else {
+        alert('No emergency contact available.');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+version: '3.9'
+
+services:
+  mysql_db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: health_records
+    ports:
+      - "3331:3306"   # avoid conflict with local MySQL
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/health-records.sql:/docker-entrypoint-initdb.d/health-records.sql
+
+  web_app:
+    build: .
+    container_name: web_app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mysql_db
+    environment:
+      DB_HOST: mysql_db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: rootpass
+      DB_NAME: health_records
+
+volumes:
+  mysql_data:
