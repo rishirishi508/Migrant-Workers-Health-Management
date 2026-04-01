@@ -64,6 +64,6 @@ The system enables location-independent access to health records, ensuring conti
 ##  Local Development
 
 ```bash
-git clone https://github.com/rishirishi508/docker-based-monolithic-application.git
+git clone https://github.com/rishirishi508/Migrant-Workers-Health-Management.git
 cd docker-based-monolithic-application
 docker-compose up --build
