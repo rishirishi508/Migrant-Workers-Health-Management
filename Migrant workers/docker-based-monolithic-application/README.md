@@ -3,7 +3,7 @@
 ### Digital Health Record Management System for Migrant Workers
 ---
 
-## 📌 Project Overview
+##  Project Overview
 The Digital Health Record Management System (DHRMS) for Migrant Workers is a web-based application designed to store and manage migrant workers’ health records digitally with secure, role-based access.
 
 This project is built using a 3-tier architecture with a multi-service backend, orchestrated using Docker Compose on a Linux environment, following DevOps best practices.
@@ -12,7 +12,7 @@ The system enables location-independent access to health records, ensuring conti
 
 ---
 
-## 🎯 Project Goals
+##  Project Goals
 - Build a modular multi-service application
 - Use Linux as the primary operating system
 - Containerize application services using Docker
@@ -20,29 +20,29 @@ The system enables location-independent access to health records, ensuring conti
 - Implement role-based access control
 - Apply DevOps practices for deployment and configuration
 
-## 🛠️ Tech Stack (DevOps Focused)
+##  Tech Stack (DevOps Focused)
 
 
-### 🖥️ Frontend
+###  Frontend
 - HTML, CSS, JavaScript  
 
-### ⚙️ Backend
+###  Backend
 - Python (Flask / FastAPI)
 - REST APIs
 
-### 🗄️ Database
+###  Database
 - MySQL
 
-### 📦 Containerization
+###  Containerization
 - Docker
 - Docker Compose (local setup)
 
-### 🔧 Version Control
+###  Version Control
 - Git & GitHub
 
 ---
 
-## 🐳 Containerization Strategy
+##  Containerization Strategy
 
 - Each service has its own `Dockerfile`
 - Services are deployed as independent containers
@@ -51,7 +51,7 @@ The system enables location-independent access to health records, ensuring conti
 
 ---
 
-## 🚀 Deployment Flow
+##  Deployment Flow
 - Source code is pushed to GitHub
 - Each service contains its own Dockerfile
 - Docker images are built locally
@@ -61,9 +61,9 @@ The system enables location-independent access to health records, ensuring conti
 
 ---
 
-## ▶️ Local Development
+##  Local Development
 
 ```bash
-git clone https://github.com/prathap-32/docker-based-monolithic-application.git
+git clone https://github.com/rishirishi508/docker-based-monolithic-application.git
 cd docker-based-monolithic-application
 docker-compose up --build
