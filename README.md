@@ -56,8 +56,6 @@ Containerization: Docker
 └── requirements.txt
 Installation & Setup
 🔹 Using Docker (Recommended)
-# Clone the repository
-git clone https://github.com/your-username/your-repo-name.git
 
 # Navigate to project folder
 cd your-repo-name
