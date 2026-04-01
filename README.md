@@ -1,29 +1,29 @@
 # Migrant-Workers-Health-Management
 A Dockerized healthcare management platform designed to securely store, manage, and access migrant workers’ medical records across different locations with ease and reliability.
 
-🚀 Overview
+ Overview
 
 Migrant workers often face difficulties in maintaining continuous medical records due to frequent relocation. This system provides a secure, portable, and scalable solution that ensures healthcare data is always accessible when needed.
 
-✨ Key Features
+ Key Features
 
-🧑‍🔧 Worker registration with unique ID and QR code
+ Worker registration with unique ID and QR code
 
-📄 Downloadable digital health card (PDF)
+ Downloadable digital health card (PDF)
 
-🏥 Doctor portal with OTP-based secure access
+ Doctor portal with OTP-based secure access
 
-🚨 Emergency “Break Glass” access with audit logging
+ Emergency “Break Glass” access with audit logging
 
-🔐 Secure authentication with password hashing
+ Secure authentication with password hashing
 
-📊 Admin dashboard with system insights and logs
+ Admin dashboard with system insights and logs
 
-🤖 AI-powered health assistant (local model integration)
+ AI-powered health assistant (local model integration)
 
-🐳 Fully containerized using Docker
+ Fully containerized using Docker
 
-🐳 Docker Support
+ Docker Support
 
 This project is fully containerized for seamless deployment:
 
@@ -54,7 +54,7 @@ Containerization: Docker
 ├── Dockerfile
 ├── docker-compose.yml
 └── requirements.txt
-⚙️ Installation & Setup
+Installation & Setup
 🔹 Using Docker (Recommended)
 # Clone the repository
 git clone https://github.com/your-username/your-repo-name.git
@@ -67,7 +67,8 @@ docker-compose up --build
 🔹 Manual Setup (Without Docker)
 pip install -r requirements.txt
 python app.py
-🔐 Security Features
+ 
+Security Features
 
 Password hashing using Werkzeug
 
@@ -77,7 +78,7 @@ Audit logs for all sensitive actions
 
 Emergency access tracking
 
-🎯 Problem Statement
+ Problem Statement
 
 Migrant workers lack a centralized system to maintain their health records, leading to:
 
@@ -87,7 +88,7 @@ Delayed or improper treatment
 
 Poor healthcare coordination
 
-✅ Solution
+ Solution
 
 This system provides a portable digital health record system that:
 
@@ -97,7 +98,7 @@ Maintains security and privacy
 
 Enables quick access during emergencies
 
-📌 Future Enhancements
+ Future Enhancements
 
 Mobile application support
 
@@ -107,11 +108,14 @@ Government health scheme integration
 
 Advanced AI health insights
 
-🤝 Contribution
+ Contribution
 
 Contributions are welcome!
 Feel free to fork this repository and submit a pull request.
 
-📜 License
+##  Local Development
 
-This project is licensed under the MIT License.
+```bash
+git clone https://github.com/rishirishi508/Migrant-Workers-Health-Management.git
+cd docker-based-monolithic-application
+docker-compose up --build
