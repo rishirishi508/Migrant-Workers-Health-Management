@@ -13,9 +13,25 @@ from email.mime.text import MIMEText
 import random
 import string
 from utils.pdf_generator import generate_health_card_pdf
+from transformers import pipeline
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+
+# Initialize Local AI Model
+print("Loading local AI model (this may take a minute on startup)...")
+try:
+    # Using TinyLlama as a small local model that supports system prompts well
+    # We load it onto CPU since we don't know if a GPU is available
+    chatbot_pipeline = pipeline(
+        "text-generation", 
+        model="TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        device_map="cpu"
+    )
+    print("Local AI model loaded successfully.")
+except Exception as e:
+    print(f"Error loading AI model: {e}")
+    chatbot_pipeline = None
 
 # Database configuration
 DB_CONFIG = {
@@ -28,12 +44,7 @@ DB_CONFIG = {
 
 def get_db_connection():
     """Get database connection"""
-    try:
-        connection = mysql.connector.connect(**DB_CONFIG)
-        return connection
-    except Error as e:
-        print(f"Database connection error: {e}")
-        return None
+    return mysql.connector.connect(**DB_CONFIG)
 
 def generate_worker_id():
     """Generate unique Worker ID"""
@@ -89,6 +100,12 @@ def worker_register():
         # Hash password
         password_hash = generate_password_hash(password)
         
+        conn = None
+
+        
+        cursor = None
+
+        
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
@@ -121,8 +138,9 @@ def worker_register():
         except Error as e:
             flash(f'Registration failed: {e}', 'error')
         finally:
-            if conn.is_connected():
-                cursor.close()
+            if conn and conn.is_connected():
+                if cursor:
+                    cursor.close()
                 conn.close()
     
     return render_template('worker-register.html')
@@ -132,6 +150,12 @@ def worker_login():
     if request.method == 'POST':
         worker_id = request.form.get('worker_id')
         password = request.form.get('password')
+
+        conn = None
+
+
+        cursor = None
+
 
         try:
             conn = get_db_connection()
@@ -155,8 +179,9 @@ def worker_login():
             print("Login error:", e)
 
         finally:
-            if conn.is_connected():
-                cursor.close()
+            if conn and conn.is_connected():
+                if cursor:
+                    cursor.close()
                 conn.close()
 
     # If GET request or failed login, render the login page
@@ -170,6 +195,12 @@ def worker_dashboard():
         return redirect(url_for('worker-login'))
 
     worker_id = session['worker_id']
+
+    conn = None
+
+
+    cursor = None
+
 
     try:
         conn = get_db_connection()
@@ -203,8 +234,9 @@ def worker_dashboard():
         return redirect(url_for('worker-login'))
 
     finally:
-        if conn.is_connected():
-            cursor.close()
+        if conn and conn.is_connected():
+            if cursor:
+                cursor.close()
             conn.close()
 @app.route('/worker/download-card')
 def download_health_card():
@@ -212,6 +244,12 @@ def download_health_card():
         return redirect(url_for('worker_login'))
     
     worker_id = session['worker_id']
+    
+    conn = None
+
+    
+    cursor = None
+
     
     try:
         conn = get_db_connection()
@@ -235,8 +273,9 @@ def download_health_card():
     except Error as e:
         flash(f'Error generating health card: {e}', 'error')
     finally:
-        if conn.is_connected():
-            cursor.close()
+        if conn and conn.is_connected():
+            if cursor:
+                cursor.close()
             conn.close()
     
     return redirect(url_for('worker_dashboard'))
@@ -253,6 +292,12 @@ def doctor_register():
         password = request.form.get('password')
         
         password_hash = generate_password_hash(password)
+        
+        conn = None
+
+        
+        cursor = None
+
         
         try:
             conn = get_db_connection()
@@ -276,8 +321,9 @@ def doctor_register():
         except Error as e:
             flash(f'Registration failed: {e}', 'error')
         finally:
-            if conn.is_connected():
-                cursor.close()
+            if conn and conn.is_connected():
+                if cursor:
+                    cursor.close()
                 conn.close()
     
     return render_template('doctor-register.html')
@@ -287,6 +333,12 @@ def doctor_login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
+        
+        conn = None
+
+        
+        cursor = None
+
         
         try:
             conn = get_db_connection()
@@ -306,8 +358,9 @@ def doctor_login():
         except Error as e:
             flash(f'Login failed: {e}', 'error')
         finally:
-            if conn.is_connected():
-                cursor.close()
+            if conn and conn.is_connected():
+                if cursor:
+                    cursor.close()
                 conn.close()
     
     return render_template('doctor-login-portal.html')
@@ -318,6 +371,12 @@ def doctor_dashboard():
         return redirect(url_for('doctor_login'))
     
     doctor_id = session['doctor_id']
+    
+    conn = None
+
+    
+    cursor = None
+
     
     try:
         conn = get_db_connection()
@@ -348,8 +407,9 @@ def doctor_dashboard():
         flash(f'Error loading dashboard: {e}', 'error')
         return redirect(url_for('doctor_login'))
     finally:
-        if conn.is_connected():
-            cursor.close()
+        if conn and conn.is_connected():
+            if cursor:
+                cursor.close()
             conn.close()
 
 @app.route('/doctor/search', methods=['POST'])
@@ -358,6 +418,12 @@ def doctor_search():
         return jsonify({'error': 'Unauthorized'}), 401
     
     worker_id = request.json.get('worker_id')
+    
+    conn = None
+
+    
+    cursor = None
+
     
     try:
         conn = get_db_connection()
@@ -379,8 +445,9 @@ def doctor_search():
     except Error as e:
         return jsonify({'error': str(e)}), 500
     finally:
-        if conn.is_connected():
-            cursor.close()
+        if conn and conn.is_connected():
+            if cursor:
+                cursor.close()
             conn.close()
 
 @app.route('/doctor/request-access', methods=['POST'])
@@ -390,6 +457,12 @@ def request_access():
     
     worker_id = request.json.get('worker_id')
     doctor_id = session['doctor_id']
+    
+    conn = None
+
+    
+    cursor = None
+
     
     try:
         conn = get_db_connection()
@@ -424,8 +497,9 @@ def request_access():
     except Error as e:
         return jsonify({'error': str(e)}), 500
     finally:
-        if conn.is_connected():
-            cursor.close()
+        if conn and conn.is_connected():
+            if cursor:
+                cursor.close()
             conn.close()
 
 @app.route('/doctor/verify-otp', methods=['POST'])
@@ -436,6 +510,12 @@ def verify_otp():
     worker_id = request.json.get('worker_id')
     otp = request.json.get('otp')
     doctor_id = session['doctor_id']
+    
+    conn = None
+
+    
+    cursor = None
+
     
     try:
         conn = get_db_connection()
@@ -485,8 +565,9 @@ def verify_otp():
     except Error as e:
         return jsonify({'error': str(e)}), 500
     finally:
-        if conn.is_connected():
-            cursor.close()
+        if conn and conn.is_connected():
+            if cursor:
+                cursor.close()
             conn.close()
 
 @app.route('/doctor/break-glass', methods=['POST'])
@@ -497,6 +578,12 @@ def break_glass_access():
     worker_id = request.json.get('worker_id')
     reason = request.json.get('reason')
     doctor_id = session['doctor_id']
+    
+    conn = None
+
+    
+    cursor = None
+
     
     try:
         conn = get_db_connection()
@@ -537,8 +624,9 @@ def break_glass_access():
     except Error as e:
         return jsonify({'error': str(e)}), 500
     finally:
-        if conn.is_connected():
-            cursor.close()
+        if conn and conn.is_connected():
+            if cursor:
+                cursor.close()
             conn.close()
 
 # Admin Routes
@@ -552,6 +640,12 @@ def admin_register():
         password = request.form.get('password')
         
         password_hash = generate_password_hash(password)
+        
+        conn = None
+
+        
+        cursor = None
+
         
         try:
             conn = get_db_connection()
@@ -572,8 +666,9 @@ def admin_register():
         except Error as e:
             flash(f'Registration failed: {e}', 'error')
         finally:
-            if conn.is_connected():
-                cursor.close()
+            if conn and conn.is_connected():
+                if cursor:
+                    cursor.close()
                 conn.close()
     
     return render_template('admin-register.html')
@@ -583,6 +678,12 @@ def admin_login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
+        
+        conn = None
+
+        
+        cursor = None
+
         
         try:
             conn = get_db_connection()
@@ -602,8 +703,9 @@ def admin_login():
         except Error as e:
             flash(f'Login failed: {e}', 'error')
         finally:
-            if conn.is_connected():
-                cursor.close()
+            if conn and conn.is_connected():
+                if cursor:
+                    cursor.close()
                 conn.close()
     
     return render_template('admin-login-portal.html')
@@ -612,6 +714,12 @@ def admin_login():
 def admin_dashboard():
     if 'admin_id' not in session or session.get('user_type') != 'admin':
         return redirect(url_for('admin_login'))
+    
+    conn = None
+
+    
+    cursor = None
+
     
     try:
         conn = get_db_connection()
@@ -654,14 +762,70 @@ def admin_dashboard():
         flash(f'Error loading dashboard: {e}', 'error')
         return redirect(url_for('admin_login'))
     finally:
-        if conn.is_connected():
-            cursor.close()
+        if conn and conn.is_connected():
+            if cursor:
+                cursor.close()
             conn.close()
+
+# AI Chatbot Route
+@app.route('/api/chat', methods=['POST'])
+def ai_chat():
+    global chatbot_pipeline
+    if chatbot_pipeline is None:
+        return jsonify({'error': 'AI Chat is currently unavailable (model failed to load locally).'}), 503
+
+    data = request.json
+    if not data or not data.get('message'):
+        return jsonify({'error': 'Message is required'}), 400
+
+    user_message = data.get('message')
+
+    try:
+        # Nexus Care specific knowledge base for the AI Assistant
+        nexus_care_context = """
+        You are Nexus Care AI, an empathetic and professional Health Assistant for Nexus Care.
+        Nexus Care is a digital health records management system designed specifically for migrant workers and healthcare providers.
+        
+        Key Information about Nexus Care:
+        - Worker Portal: Allows migrant workers to register, access their health records, and download a digital health card with a QR code.
+        - Doctor Portal: Allows authorized doctors to access patient records with OTP consent verification, manage treatments, and use emergency "Break Glass" override access.
+        - Admin Portal: Allows system administrators to monitor statistics, audit access logs, and manage emergency access events.
+        - Security Features: OTP verification for routine access, complete audit trails for all data access, and secure PDF health cards.
+        
+        Guidelines for your responses:
+        1. Keep responses concise, clear, and easy to understand.
+        2. Provide answers in a supportive and professional tone.
+        3. Only use the information provided above to answer questions about Nexus Care.
+        4. If a user asks a general health question, provide general advice but advise them to consult a doctor through the Nexus Care platform for specific medical advice.
+        5. You are an AI and cannot diagnose illnesses or prescribe medication.
+        """
+        
+        messages = [
+            {
+                "role": "system",
+                "content": nexus_care_context.strip(),
+            },
+            {"role": "user", "content": user_message},
+        ]
+        
+        prompt = chatbot_pipeline.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        outputs = chatbot_pipeline(prompt, max_new_tokens=250, do_sample=True, temperature=0.7, top_k=50, top_p=0.95)
+        
+        # Extract only the generated response
+        reply_text = outputs[0]["generated_text"][len(prompt):].strip()
+        
+        return jsonify({'reply': reply_text})
+    except Exception as e:
+        print(f"Chatbot error: {e}")
+        return jsonify({'error': 'Failed to generate a response. Please try again later.'}), 500
 
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('index'))
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+import os
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)

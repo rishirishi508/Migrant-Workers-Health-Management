@@ -17,7 +17,7 @@
       <div class="flex justify-between h-16">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <h1 class="text-2xl font-bold text-indigo-600" data-id="nav-logo">Zencare</h1>
+            <h1 class="text-2xl font-bold text-indigo-600" data-id="nav-logo">Nexus Care</h1>
           </div>
         </div>
         <div class="flex items-center space-x-4">
@@ -160,13 +160,62 @@
         Start Health Chat
       </button>
     </div>
+
+    <!-- AI Chat Modal -->
+    <div id="chat-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" id="chat-backdrop"></div>
+      
+      <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl flex flex-col h-[600px] max-h-[90vh] overflow-hidden transform transition-all">
+        <!-- Header -->
+        <div class="bg-indigo-600 p-4 flex justify-between items-center text-white">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <i data-lucide="bot" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-lg">Nexus Care AI Assistant</h3>
+              <p class="text-xs text-indigo-100">Online | Ready to help</p>
+            </div>
+          </div>
+          <button id="close-chat-btn" class="p-2 hover:bg-white/20 rounded-full transition-colors focus:outline-none">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Chat Area -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+          <!-- Welcome Message -->
+          <div class="flex gap-3">
+            <div class="w-8 h-8 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center">
+              <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i>
+            </div>
+            <div class="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm max-w-[80%] rounded-tl-none">
+              <p class="text-gray-800 text-sm">Hello! I'm your Nexus Care Health Assistant. How can I help you today?</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 bg-white border-t border-gray-100">
+          <form id="chat-form" class="flex gap-2">
+            <input type="text" id="chat-input" placeholder="Type your message..." 
+                   class="flex-1 border border-gray-200 rounded-full px-4 py-2 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm"
+                   required autocomplete="off">
+            <button type="submit" 
+                    class="bg-indigo-600 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-indigo-700 transition-colors shadow-md disabled:opacity-50 flex-shrink-0 focus:outline-none">
+              <i data-lucide="send" class="w-4 h-4 ml-1"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
   </main>
 
   <footer class="bg-gray-900 text-white py-12" data-id="main-footer">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid md:grid-cols-4 gap-8">
         <div>
-          <h3 class="text-xl font-bold mb-4" data-id="footer-about-title">About Zencare</h3>
+          <h3 class="text-xl font-bold mb-4" data-id="footer-about-title">About Nexus Care</h3>
           <p class="text-gray-400" data-id="footer-about-text">
             Providing secure and accessible health record management for migrant workers worldwide.
           </p>
@@ -190,13 +239,13 @@
         <div>
           <h4 class="text-lg font-semibold mb-4" data-id="footer-contact-title">Contact Info</h4>
           <div class="text-gray-400 space-y-2">
-            <p data-id="footer-email">support@zencare.com</p>
+            <p data-id="footer-email">support@nexuscare.com</p>
             <p data-id="footer-phone">+91 98000 98000</p>
           </div>
         </div>
       </div>
       <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-        <p data-id="footer-copyright">© 2025 Zencare Digital Health Records. All rights reserved.</p>
+        <p data-id="footer-copyright">© 2025 Nexus Care Digital Health Records. All rights reserved.</p>
       </div>
     </div>
   </footer>
@@ -206,8 +255,105 @@
     lucide.createIcons();
 
     // AI Chat functionality
-    document.querySelector('[data-id="ai-chat-btn"]').addEventListener('click', () => {
-      alert('AI Health Assistant coming soon! This will provide multilingual support for health-related questions.');
+    const chatBtn = document.querySelector('[data-id="ai-chat-btn"]');
+    const chatModal = document.getElementById('chat-modal');
+    const chatBackdrop = document.getElementById('chat-backdrop');
+    const closeBtn = document.getElementById('close-chat-btn');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const chatMessages = document.getElementById('chat-messages');
+
+    function toggleModal() {
+      chatModal.classList.toggle('hidden');
+      if (!chatModal.classList.contains('hidden')) {
+        chatInput.focus();
+      }
+    }
+
+    chatBtn.addEventListener('click', toggleModal);
+    closeBtn.addEventListener('click', toggleModal);
+    chatBackdrop.addEventListener('click', toggleModal);
+
+    function addMessage(text, isUser = false) {
+      const div = document.createElement('div');
+      div.className = `flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`;
+      
+      const iconClass = isUser ? 'user' : 'bot';
+      const bgClass = isUser ? 'bg-indigo-100 text-indigo-600' : 'bg-indigo-100 text-indigo-600';
+      const bubbleClass = isUser ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white border border-gray-100 shadow-sm rounded-tl-none text-gray-800';
+      
+      // simple markdown rendering for bold
+      let formattedText = text.replace(/\\n/g, '<br>').replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>');
+      
+      div.innerHTML = `
+        <div class="w-8 h-8 rounded-full ${bgClass} flex-shrink-0 flex items-center justify-center">
+          <i data-lucide="${iconClass}" class="w-5 h-5"></i>
+        </div>
+        <div class="p-3 rounded-2xl max-w-[85%] text-sm ${bubbleClass}" style="word-break: break-word;">
+          ${formattedText}
+        </div>
+      `;
+      chatMessages.appendChild(div);
+      lucide.createIcons({ root: div });
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function addLoading() {
+      const div = document.createElement('div');
+      div.id = 'chat-loading';
+      div.className = 'flex gap-3';
+      div.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center">
+          <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm rounded-tl-none flex items-center gap-1">
+          <div class="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style="animation-delay: 0ms"></div>
+          <div class="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style="animation-delay: 150ms"></div>
+          <div class="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style="animation-delay: 300ms"></div>
+        </div>
+      `;
+      chatMessages.appendChild(div);
+      lucide.createIcons({ root: div });
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function removeLoading() {
+      const loading = document.getElementById('chat-loading');
+      if (loading) loading.remove();
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = chatInput.value.trim();
+      if (!message) return;
+
+      // Add user message to UI
+      addMessage(message, true);
+      chatInput.value = '';
+      
+      // Add loading state
+      addLoading();
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+        
+        const data = await response.json();
+        removeLoading();
+        
+        if (response.ok && data.reply) {
+          addMessage(data.reply);
+        } else {
+          addMessage(`Sorry, I encountered an error: ${data.error || 'Unknown error'}`);
+        }
+      } catch (err) {
+        removeLoading();
+        addMessage('Sorry, I am having trouble connecting to the server. Please check your internet connection and try again.');
+        console.error('Chat error:', err);
+      }
     });
   </script>
 </body>
