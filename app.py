@@ -13,7 +13,7 @@ from email.mime.text import MIMEText
 import random
 import string
 from utils.pdf_generator import generate_health_card_pdf
-from transformers import pipeline
+##from transformers import pipeline
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
